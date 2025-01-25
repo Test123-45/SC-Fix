@@ -1,0 +1,36 @@
+name: "CodeQL Scan and Export to CSV"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  analyze:
+    name: CodeQL Scan and Export to CSV
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Step 2: Initialize CodeQL
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: javascript # Change to the languages of your repository
+        packs: codeql/javascript-queries
+
+    # Step 3: Perform CodeQL Analysis
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+    # Step 4: Export results to CSV
+    - name: Convert SARIF to CSV
+      run: |
+        mkdir -p CSV
+        TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+        OUTPUT_FILE="CSV/codeql_results_${TIMESTAMP}.csv"
+        jq -r '.runs[].results[] | [.ruleId, .message.text, .locations[0].physicalLocation.artifactLocation.uri, .locations[0].physicalLocation.region.startLine] | @csv' results.sarif > $OUTPUT_FILE
+      shell: bash
