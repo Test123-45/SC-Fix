@@ -1,0 +1,27 @@
+name: Generate File Structure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate-structure:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Generate File Structure
+        run: |
+          tree -a -I ".git|node_modules" > structure.txt
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add structure.txt
+          git commit -m "Update file structure"
+          git push
+        continue-on-error: true  # Avoids errors if no changes are detected
