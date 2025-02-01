@@ -1,31 +1,30 @@
-const express=require('express');
-const serveStatic=require('serve-static');
+const express = require('express');
+const serveStatic = require('serve-static');
 
-var hostname="localhost";
-var port=3001;
+const port = 3001;
+const hostname = "0.0.0.0";  // Change to "localhost" if you only need local access
 
-var app=express();
+const app = express();
 
-app.use(function(req,res,next){
-    console.log(req.url);
-    console.log(req.method);
-    console.log(req.path);
-    console.log(req.query.id);
+// Middleware to log requests and restrict non-GET requests
+app.use((req, res, next) => {
+    console.log(`Request URL: ${req.url}`);
+    console.log(`Method: ${req.method}`);
+    console.log(`Path: ${req.path}`);
+    console.log(`Query ID: ${req.query.id || "N/A"}`);
 
-    if(req.method!="GET"){
+    if (req.method !== "GET") {
         res.type('.html');
-        var msg="<html><body>This server only serves web pages with GET!</body></html>";
-        res.end(msg);
-    }else{
+        res.status(405).send("<html><body><h2>Error 405: Only GET requests are allowed!</h2></body></html>");
+    } else {
         next();
     }
 });
 
+// Serve static files from "public" directory
+app.use(serveStatic(__dirname + "/public"));
 
-app.use(serveStatic(__dirname+"/public"));
-
-
-app.listen(port,hostname,function(){
-
-    console.log(`Server hosted at http://${hostname}:${port}`);
+// Start the server
+app.listen(port, hostname, () => {
+    console.log(`🚀 Server is running at http://${hostname}:${port}/`);
 });
