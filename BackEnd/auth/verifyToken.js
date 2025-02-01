@@ -1,28 +1,36 @@
+const path = require('path');
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const config = require('../config');
+const logFile = path.join(__dirname, 'login.logs');
 
+function logMessage(message) {
+    fs.appendFileSync(logFile, `${new Date().toISOString()} - ${message}\n`);
+}
 
-var jwt = require('jsonwebtoken');
-var config = require('../config');
-
-function verifyToken(req, res, next){
-
-    var token = req.headers['authorization']; //retrieve authorization header's content
-
-    if(!token || !token.includes('Bearer')){ 
+function verifyToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
     
-       res.status(403);
-       return res.send({auth:'false', message:'Not authorized!'});
-    }else{
-       token=token.split('Bearer ')[1]; //obtain the token's value
-       jwt.verify(token, config.key, function(err, decoded){ //verify token
-        if(err){
-            res.status(403);
-            return res.end({auth:false, message:'Not authorized!'});
-        }else{
-            req.id = decoded.id
-            next();
-        }
-       });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        const message = "Unauthorized access attempt detected";
+        console.warn(message);
+        logMessage(message);
+        return res.status(403).json({ auth: false, message: 'Access denied. Missing or invalid token.' });
     }
+    
+    const token = authHeader.split('Bearer ')[1];
+    
+    jwt.verify(token, config.key, (err, decoded) => {
+        if (err) {
+            const message = `Token verification failed: ${err.message}`;
+            console.error(message);
+            logMessage(message);
+            return res.status(403).json({ auth: false, message: 'Invalid or expired token.' });
+        }
+        
+        req.id = decoded.id;
+        next();
+    });
 }
 
 module.exports = verifyToken;
