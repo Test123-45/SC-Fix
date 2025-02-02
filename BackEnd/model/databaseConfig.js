@@ -1,17 +1,17 @@
-
-
+require('dotenv').config();
 var mysql = require('mysql2');
 
+
 var dbconnect = {
-getConnection: function() {
+  getConnection: function() {
     var conn = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "Pa$$w0rd",
-    database: "snapsell"
-});
-return conn;
-}
+      host: process.env.DB_HOST || "localhost",
+      user: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME
+    });
+    return conn;
+  }
 };
 
-module.exports = dbconnect
+module.exports = dbconnect;
