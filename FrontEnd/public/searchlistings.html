@@ -8,6 +8,12 @@
 <link rel="stylesheet" href="css/listings.css">
 
 <script>
+    function sanitizeInput(input) {
+        var element = document.createElement('div');
+        element.innerText = input;
+        return element.innerHTML;
+    }
+
     $(document).ready(function () {
         var userData = localStorage.getItem('userData');
         var userDataJson = JSON.parse(userData);
@@ -26,7 +32,7 @@
         }
 
         $('#profile').html(username);
-        $('#searchheader').html("Listings which contains:" + search);
+        $('#searchheader').html("Listings which contains:" + sanitizeInput(search));
 
         $.ajax({
             headers: { "authorization": "Bearer " + token },
@@ -196,4 +202,3 @@
         </div>
     </nav>
 </div>
-

@@ -1,10 +1,15 @@
-
-
 var db = require('./databaseConfig.js');
+
+function validateInput(input) {
+    const regex = /^[a-zA-Z0-9\s.,'-]*$/;
+    return regex.test(input);
+}
 
 var listingDB = {
     addListing: function (title, category, description, price, fk_poster_id, callback) {
-        console.log(description);
+        if (!validateInput(title) || !validateInput(category) || !validateInput(description)) {
+            return callback(new Error("Invalid input"), null);
+        }
         var conn = db.getConnection();
 
         conn.connect(function (err) {
@@ -70,6 +75,9 @@ var listingDB = {
         })
     },
     getOtherUsersListings: function (query, userid, callback) {
+        if (!validateInput(query)) {
+            return callback(new Error("Invalid input"), null);
+        }
         var conn = db.getConnection();
         conn.connect(function (err) {
             if (err) {
