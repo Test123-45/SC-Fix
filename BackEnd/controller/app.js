@@ -1,5 +1,3 @@
-
-
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
@@ -9,6 +7,7 @@ var offers = require('../model/offer');
 var likes = require('../model/likes');
 var images = require('../model/images')
 var verifyToken = require('../auth/verifyToken.js');
+var bcrypt = require('bcryptjs');
 
 var path = require("path");
 var multer = require('multer')
@@ -85,14 +84,21 @@ app.post('/user', function (req, res) {//Create User
 	var profile_pic_url = req.body.profile_pic_url
 	var role = req.body.role
 
-	user.addUser(username, email, password, profile_pic_url, role, function (err, result) {
+	bcrypt.hash(password, 10, function(err, hash) {
 		if (err) {
 			res.status(500);
 			res.send(err);
 		} else {
-			res.status(201);
-			res.setHeader('Content-Type', 'application/json');
-			res.send(result);
+			user.addUser(username, email, hash, profile_pic_url, role, function (err, result) {
+				if (err) {
+					res.status(500);
+					res.send(err);
+				} else {
+					res.status(201);
+					res.setHeader('Content-Type', 'application/json');
+					res.send(result);
+				}
+			});
 		}
 	});
 });
