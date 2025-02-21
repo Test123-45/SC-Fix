@@ -12,8 +12,8 @@ var offerDB = {
                 return callback(err, null);
             }
             else {
-                var sql = `insert into offers(offer,fk_listing_id,fk_offeror_id,status) values('${offer}', '${fk_listing_id}', '${fk_offeror_id}', '${status}')`;
-                conn.query(sql, [], function (err, result) {
+                var sql = 'insert into offers(offer,fk_listing_id,fk_offeror_id,status) values(?, ?, ?, ?)';
+                conn.query(sql, [offer, fk_listing_id, fk_offeror_id, status], function (err, result) {
                     conn.end();
                     if (err) {
                         console.log("Err: " + err);
