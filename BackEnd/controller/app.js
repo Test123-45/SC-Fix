@@ -22,61 +22,23 @@ app.use(cors());//Just use
 app.use(bodyParser.json());
 app.use(urlencodedParser);
 
-const axios = require('axios');
+//User APIs
+app.post('/user/login', function (req, res) {//Login
+	var email = req.body.email;
+	var password = req.body.password;
 
-// Make sure your express app is configured to parse JSON (already set in your code)
-app.post('/user/login', async function (req, res) {
-  const { email, password, captchaResponse } = req.body;
-  
-  // Check if a captcha response was provided
-  if (!captchaResponse) {
-    return res.status(400).json({ success: false, message: "CAPTCHA response missing" });
-  }
-  
-  // Verify the reCAPTCHA response with Google
-  const secretKey = "6LeRy8kqAAAAABkvOVYc4zb-MQqy2E5D_R-_qSjS"; // Keep secret key secure!
-  try {
-    const captchaVerification = await axios.post(
-      `https://www.google.com/recaptcha/api/siteverify`,
-      null,
-      {
-        params: {
-          secret: secretKey,
-          response: captchaResponse
-        }
-      }
-    );
-    
-    // If CAPTCHA verification fails, do not proceed with login
-    if (!captchaVerification.data.success) {
-      return res.status(403).json({ success: false, message: "CAPTCHA validation failed" });
-    }
-    
-    // CAPTCHA is valid, proceed with login logic
-    user.loginUser(email, password, function (err, token, result) {
-      if (err) {
-        res.status(500).send(err.statusCode);
-      } else {
-        res.status(201);
-        res.setHeader('Content-Type', 'application/json');
-        // Remove sensitive information before sending user data to client
-        if (result && result[0]) {
-          delete result[0]['password'];
-        }
-        res.json({
-          success: true,
-          UserData: JSON.stringify(result),
-          token: token,
-          status: 'You are successfully logged in!'
-        });
-      }
-    });
-  } catch (error) {
-    console.error("Error during CAPTCHA verification:", error);
-    res.status(500).json({ success: false, message: "CAPTCHA verification error" });
-  }
+	user.loginUser(email, password, function (err, token, result) {
+		if (err) {
+			res.status(500);
+			res.send(err.statusCode);
+		} else {
+			res.statusCode = 201;
+			res.setHeader('Content-Type', 'application/json');
+			delete result[0]['password'];//clear the password in json data, do not send back to client
+			res.json({ success: true, UserData: JSON.stringify(result), token: token, status: 'You are successfully logged in!' });
+		}
+	});
 });
-
 
 app.post('/user', function (req, res) {//Create User
 	var username = req.body.username;

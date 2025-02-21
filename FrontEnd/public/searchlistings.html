@@ -139,7 +139,7 @@
 
         $('#searchbutton').click(function () {
             var search = $('#search').val()
-            window.location.assign("http://localhost:3001/searchlistings.html?search=" + encodeURIComponent(search))
+            window.location.assign("http://localhost:3001/searchlistings.html?search=" + `${search}`)
         })
     });
 </script>
